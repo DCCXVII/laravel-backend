@@ -31,12 +31,15 @@ Route::controller(GuestPageController::class)->group(function () {
     Route::get('/discipline/{id}', 'getDiscipline');
     Route::get('/instrunctor/', 'getInstructor');
     Route::get('/series/', 'getPacks');
+    Route::get('/explore','explore');
 });
-
-Route::post('/email/verifivartion-notification', [EmailVerificationController::class, 'sendVerification'])->middleware('auth:sanctum');
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+    ->middleware('auth:sanctum')
+   ->name('verification.verify');
+/*Route::post('/email/verifivartion-notification', [EmailVerificationController::class, 'sendVerification'])->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->get('/users', function (Request $request) {
     return $request->user();
-});
+});*/
 Route::middleware('auth:sanctum', 'role:client')->get('/user', function (Request $request) {
     return $request->user();
 });
