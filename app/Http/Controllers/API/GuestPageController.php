@@ -80,7 +80,7 @@ class GuestPageController extends Controller
             $query->where('niveau', $request->input('difficulty'));
         }
     
-        $courses = $query->select('id', 'titre', 'description', 'price', 'background_image', 'niveau')->get();
+        $courses = $query->select('id', 'titre', 'description', 'price', 'background_image', 'niveau','views_number','sells_number')->get();
     
         return response()->json([
             'courses' => $courses,

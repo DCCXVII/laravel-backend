@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+
 use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Http\Request;
-use Laravel\Sanctum\Sanctum;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
+
 
 
 class AuthController extends BaseController
@@ -43,8 +44,16 @@ class AuthController extends BaseController
     {
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
+            if ($user->hasRole('instructor') && !$user->password_changed) {
+                // Instruct the instructor to change their password
+                return response()->json([
+                    'change_password_required' => true,
+                    'message' => 'You are required to change your password.',
+                ], 200);
+            }
             $success['token'] =  $user->createToken('MyApp')->plainTextToken;
             $success['name'] =  $user->name;
+
 
             return $this->sendResponse($success, 'User login successfully.');
         } else {
