@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('nivaeu', ['Débutant', 'Intermédiaire',  'avancée']);
             $table->double('price');
             $table->foreignId('instructor_id')->constrained('users');
-            $table->foreignId('discipline_id')->constrained('dicsiplines');
+            $table->foreignId('discipline_id')->constrained('disciplines');
             $table->foreignId('classe_id')->constrained('classes');
         });
     }

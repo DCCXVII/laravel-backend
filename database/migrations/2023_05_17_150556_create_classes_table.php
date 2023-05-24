@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('titre');
             $table->longtext('classe_description');
-            $table->foreignId('discipline_id')->constrained('dicsiplines');
+            $table->foreignId('discipline_id')->constrained('disciplines');
             $table->timestamps();
         });
     }

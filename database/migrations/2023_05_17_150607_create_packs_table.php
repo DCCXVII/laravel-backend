@@ -21,7 +21,7 @@ return new class extends Migration
             $table->double('price');
             $table->foreignId('coach_id')->constrained('users');
             $table->foreignId('classe_id')->constrained('classes');
-            $table->foreignId('discipline_id')->constrained('dicsiplines');
+            $table->foreignId('discipline_id')->constrained('disciplines');
             $table->timestamps();
         });
     }
