@@ -21,8 +21,11 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('abonne')->nullable();
             $table->string('img_url')->nullable();
+            $table->string('background_img');
             $table->string('description')->nullable();
             $table->string('instagram_url')->nullable();
+            $table->boolean('password_changed')->default(false);
+            $table->boolean('status')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

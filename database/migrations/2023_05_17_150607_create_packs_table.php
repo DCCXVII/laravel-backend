@@ -15,17 +15,22 @@ return new class extends Migration
     {
         Schema::create('packs', function (Blueprint $table) {
             $table->id();
-            $table->string('titre');
+            $table->string('titre')->unique();
             $table->longText('description');
             $table->enum('niveau', ['débutant', 'intermédiaire',  'avancée']);
             $table->double('price');
-            $table->foreignId('coach_id')->constrained('users');
-            $table->foreignId('classe_id')->constrained('classes');
-            $table->foreignId('discipline_id')->constrained('disciplines');
+            $table->string('thumbnail_image');
+            $table->bigInteger('views_number');
+            $table->bigInteger('sells_number');
+            $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('discipline_id')->constrained('disciplines')->onDelete('cascade');
+            $table->string('teaser_url')->nullable();
+            $table->enum('status', ['en_attente', 'accepté', 'refusé'])->default('en_attente');
             $table->timestamps();
         });
     }
 
+    
     /**
      * Reverse the migrations.
      *

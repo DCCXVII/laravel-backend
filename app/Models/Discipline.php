@@ -9,12 +9,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Discipline extends Model
 {
     use HasFactory;
-    public function Classes(): HasMany
+
+    protected $fillable = [
+        'titre',
+        'discipline_description',
+        'background_img'
+
+    ];
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'discipline_id');
+    }
+
+    public function classes()
     {
         return $this->hasMany(Classe::class);
-    }
-    public function Courses(): HasMany
-    {
-        return $this->hasMany(Course::class);
     }
 }

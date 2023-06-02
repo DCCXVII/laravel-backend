@@ -15,15 +15,21 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->string('titre');
+            $table->string('titre')->unique();
             $table->string('url');
             $table->longText('description');
-            $table->enum('nivaeu', ['Débutant', 'Intermédiaire',  'avancée']);
+            $table->enum('niveau', ['Débutant', 'Intermédiaire',  'avancée']);
             $table->double('price');
-            $table->foreignId('instructor_id')->constrained('users');
-            $table->foreignId('discipline_id')->constrained('disciplines');
-            $table->foreignId('classe_id')->constrained('classes');
+            $table->string('backgroun
+            d-image');
+            $table->bigInteger('views_number');
+            $table->bigInteger('sells_number');
+            $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('discipline_id')->constrained('disciplines')->onDelete('cascade');
+            $table->foreignId('classe_id')->constrained('classes')->onDelete('cascade');
+            $table->time('duration');
+            $table->enum('status', ['en_attente', 'accepté', 'refusé'])->default('en_attente');
+            $table->timestamps();
         });
     }
 

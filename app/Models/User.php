@@ -30,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'img_url',
+        'description'
     ];
 
     /**
@@ -50,4 +52,20 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'instructor_id');
+    }
+
+    public function packs()
+    {
+        return $this->  hasMany(Pack::class, 'instructor_id');
+    }
+
+    public function verificationUrl($token)
+    {
+        // Customize the URL here
+        return url("/verify-email/{$token}");
+    }
 }

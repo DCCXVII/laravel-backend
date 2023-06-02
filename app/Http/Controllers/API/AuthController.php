@@ -17,13 +17,15 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends BaseController
 {
+
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email',
             'password' => 'required',
-            'c_password' => 'required|same:password',
+
         ]);
 
         if ($validator->fails()) {
@@ -37,6 +39,8 @@ class AuthController extends BaseController
         $success['name'] =  $user->name;
         $role = Role::findByName('client');
         $user->assignRole($role);
+        $user->sendEmailVerificationNotification();
+
         return $this->sendResponse($success, 'User register successfully.');
     }
 
@@ -44,15 +48,20 @@ class AuthController extends BaseController
     {
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-            if ($user->hasRole('instructor') && !$user->password_changed) {
+            /* if ($user->hasRole('instructor') && !$user->password_changed) {
                 // Instruct the instructor to change their password
                 return response()->json([
                     'change_password_required' => true,
                     'message' => 'You are required to change your password.',
-                ], 200);
-            }
+                ], 200);}*/
+
             $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+
             $success['name'] =  $user->name;
+            $success['email'] = $user->email;
+            $success['image'] = $user->img_url;
+            $success['role'] = $user->roles->first()->name;
+            $success['csrf_token'] = csrf_token();
 
 
             return $this->sendResponse($success, 'User login successfully.');

@@ -28,7 +28,12 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
-       
+        VerifyEmail::createUrlUsing(function ($user) {
+            return URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(60),
+                ['id' => $user->id]
+            );
+        });
     }
 }

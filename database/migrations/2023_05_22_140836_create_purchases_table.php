@@ -15,6 +15,10 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
+            $table->string('transaction_id');
+            $table->double('montant');
+            $table->string('payement_gateway');
+            $table->foreignId('client_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

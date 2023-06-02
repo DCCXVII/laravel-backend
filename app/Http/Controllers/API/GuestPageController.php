@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Discipline;
 use App\Models\User;
 use App\Models\Course;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class GuestPageController extends Controller
 {
@@ -29,7 +31,9 @@ class GuestPageController extends Controller
 
         if ($request->has('id')) {
             $query->where('id', $request->input('id'));
-            $query->with('classes.courses');
+            $query->with(['classes.courses' => function ($query) {
+                $query->where('status', 'accepted');
+            }]);
         }
 
         if ($request->has('instructor_id')) {
@@ -37,58 +41,86 @@ class GuestPageController extends Controller
 
             $query->whereHas('classes.courses', function ($query) use ($instructorId) {
                 $query->where('instructor_id', $instructorId);
+                $query->where('status', 'accepté');
             });
         }
 
-        $query->with('classes.classes');
+        $query->with(['classes.courses' => function ($query) {
+            $query->where('status', 'accepté');
+        }]);
 
         $discipline = $query->get();
-        //$courses = Course::where('dicipline_id', $request['id']);
+
         return response()->json([
-            'discipline' => $discipline //,
-            //'course' => $courses
+            'discipline' => $discipline
         ]);
     }
 
     public function explore(Request $request)
     {
 
-        $query = Course::query()->with(['discipline:name', 'classe:name', 'User:name']);
+        $query = Course::query();
 
         if ($request->has('id')) {
             $query->where('id', $request->input('id'));
         }
-    
+
         if ($request->has('discipline_id')) {
             $query->where('discipline_id', $request->input('discipline_id'));
         }
-    
+
         if ($request->has('classe_id')) {
             $query->where('classe_id', $request->input('classe_id'));
         }
-    
+
         if ($request->has('instructor_id')) {
             $query->where('instructor_id', $request->input('User_id'));
         }
-    
+
         if ($request->has('duration')) {
             $duration = $request->input('duration');
             $query->whereTime('duration', '>=', $duration);
         }
-    
+
         if ($request->has('difficulty')) {
             $query->where('niveau', $request->input('difficulty'));
         }
-    
-        $courses = $query->select('id', 'titre', 'description', 'price', 'background_image', 'niveau','views_number','sells_number')->get();
-    
+
+
+
+        $courses = $query->where('status', '=', 'refusé')->get();
+
+
+
         return response()->json([
             'courses' => $courses,
         ]);
     }
 
-    public function getInstructors(Request $request){
-         
-        $instructor = User::
+    public function getInstructors(Request $request)
+    {
+
+        $instructorRole = Role::where('name', 'instructor')->firstOrFail();
+        $query = DB::table('users')
+            ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
+            ->where('model_has_roles.role_id', $instructorRole->id);
+        if ($request->has('id')) {
+            $query->where('users.id', $request->input('id'));
+        }
+
+        $instructors = $query->select('id', 'name', 'email', 'img_url', 'description')->get();
+
+        return response()->json([
+            'instructors' => $instructors,
+        ]);
+    }
+
+    public function getInstructorById($id)
+    {
+        $instructorRole = Role::where('name', 'instructor')->firstOrFail();
+        $instructor = $instructorRole->users->where('id', $id)->map(function ($user) {
+            return $user->only(['id', 'name', 'email', 'background_img', 'description', 'img_url']);
+        });
+        return response()->json($instructor);
     }
 }
