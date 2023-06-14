@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('type');
             $table->double('price');
-            $table->double('reduction');
+            $table->double('reduction')->nullable();
+            $table->integer('duration');
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subscribe_information');
+        Schema::dropIfExists('subscribtions');
     }
 };

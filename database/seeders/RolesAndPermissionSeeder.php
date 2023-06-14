@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionSeeder extends Seeder
 {
@@ -19,5 +20,9 @@ class RolesAndPermissionSeeder extends Seeder
         Role::create(['name' => 'admin']);
         Role::create(['name' => 'instructor']);
         Role::create(['name' => 'client']);
+
+        Permission::create(['name' => 'access-all-content', 'guard_name' => 'sanctum']);
+
+        Permission::create(['name' => 'access-purchase-content', 'guard_name' => 'sanctum']);
     }
 }

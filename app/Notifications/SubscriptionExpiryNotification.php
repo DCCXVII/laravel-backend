@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class VerifyEmailNotification extends Notification
+class SubscriptionExpiryNotification extends Notification
 {
     use Queueable;
 
@@ -38,12 +38,15 @@ class VerifyEmailNotification extends Notification
      * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
+    
+
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('Subscription Expiry Notification')
+            ->line('Your subscription is expiring soon.')
+            ->action('Renew Subscription', url('/subscriptions/renew'))
+            ->line('Thank you for using our service!');
     }
 
     /**

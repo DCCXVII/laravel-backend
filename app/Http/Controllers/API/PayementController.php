@@ -12,7 +12,8 @@ use App\Models\Course;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subscriber;
-use App\Models\subscription;
+use App\Models\Subscribtion;
+
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -84,7 +85,7 @@ class PayementController extends Controller
                 }
             }
         }
-       
+
 
         /*Make a request to the payment gateway API
         $response = Http::post('https://api.payment-gateway.com/process-payment', [
@@ -103,6 +104,7 @@ class PayementController extends Controller
             $purchase->montant = $totalAmount;
             $purchase->client_id = auth()->user()->id;
             $purchase->payement_gateway    = 'paypal';
+            $purchase->type = 'purchase_items';
 
             $purchase->save();
 
@@ -153,54 +155,70 @@ class PayementController extends Controller
         }
     }
 
- 
 
-public function subscribe(Request $request)
-{
-    // Validate the request data
-    $validator = Validator::make($request->all(), [
-        'subscription_id' => 'required|exists:subscribtions,id',
-        
-         /* 'card_number' => 'required|numeric',
+
+    public function subscribe(Request $request)
+    {
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'subscription_id' => 'required|exists:subscribtions,id',
+
+            /* 'card_number' => 'required|numeric',
             'expiration_month' => 'required|numeric|digits_between:1,12',
             'expiration_year' => 'required|numeric', */
 
-    ]);
-    if ($validator->fails()) {
-        // Handle validation errors
-        return response()->json(['errors' => $validator->errors()], 422);
+        ]);
+        if ($validator->fails()) {
+            // Handle validation errors
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Get the subscription ID, client ID, and payment information from the request
+        $subscriptionId = $request->input('subscription_id');
+        $clientId =  auth()->user()->id;
+        $paymentInfo = $request->input('payment_info');
+
+        // Retrieve the subscription information
+        $subscription = Subscribtion::findOrFail($subscriptionId);
+
+
+        // Calculate the start and end dates for the subscription
+        $startDate = Carbon::now();
+
+        $endDate = $startDate->copy()->addDays($subscription->duration);
+
+
+        if ($request->input('transaction_id')) {
+            $transactionId = $request->input('transaction_id');
+            $purchase = new Purchase();
+            $purchase->transaction_id = $transactionId;
+            $purchase->montant = $subscription->price;
+            $purchase->client_id = auth()->user()->id;
+            $purchase->payement_gateway    = 'paypal';
+            $purchase->type = 'subscription';
+
+            $purchase->save();
+
+            // Create a new subscriber record
+            $subscriber = new Subscriber();
+            $subscriber->user_id = $clientId;
+            $subscriber->start_date = $startDate;
+            $subscriber->subscribtions_id = $subscription->id;
+            $subscriber->end_date = $endDate;
+            $subscriber->save();
+
+            // Update the user's role and permissions
+            $user = User::findOrFail($clientId);
+            $user->givePermissionTo('access-all-content');
+
+
+
+
+            // Return a response indicating success
+            return response()->json(['success' => true, 'message' => 'Subscription successful']);
+        }
+
+
+        return response()->json(['success' => false, 'message' => 'something went wrong']);
     }
-
-    // Get the subscription ID, client ID, and payment information from the request
-    $subscriptionId = $request->input('subscription_id');
-    $clientId =  auth()->user()->id;
-    $paymentInfo = $request->input('payment_info');
-
-    // Retrieve the subscription information
-    $subscription = subscription::findOrFail($subscriptionId);
-
-    // Calculate the start and end dates for the subscription
-    $startDate = Carbon::now();
-    $endDate = $startDate->copy()->addDays($subscription->duration);
-
-    // Create a new subscriber record
-    $subscriber = new Subscriber();
-    $subscriber->user_id = $clientId;
-    $subscriber->start_date = $startDate;
-    $subscriber->end_date = $endDate;
-    $subscriber->save();
-
-    // Update the user's role and permissions
-    $user = User::findOrFail($clientId);
-    $user->givePermissionTo('access-all-content');
-  
-
-  
-
-    // Return a response indicating success
-    return response()->json(['success' => true, 'message' => 'Subscription successful']);
 }
-
-}
-
-

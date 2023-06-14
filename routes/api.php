@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GuestPageController;
 use App\Http\Controllers\API\InstructorPageController;
 use App\Http\Controllers\API\AdminPageController;
+use App\Http\Controllers\API\ClientPageController;
 use App\Http\Controllers\API\PayementController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::controller(PayementController::class)->group(function () {
         Route::post('/purchase', 'processPayment');
+        Route::post('/subscribe', 'subscribe');
     });
 });
 
@@ -45,7 +47,7 @@ Route::controller(GuestPageController::class)->group(function () {
     Route::get('/discipline/', 'discipline');
     Route::get('/instrunctor/{id}', 'getInstructorById');
     Route::get('/instrunctor/', 'getInstructors');
-    Route::get('/coursres','getCourses');
+    Route::get('/coursres', 'getCourses');
     Route::get('/series/', 'getPacks');
     Route::get('/explore', 'explore');
 });
@@ -77,7 +79,7 @@ Route::group(['prefix' => 'instructor', 'middleware' => ['auth:sanctum', 'role:i
 });
 
 //Admin Route
-Route::group(['prefix' => 'admin'/*,  'middleware' => ['auth:sanctum', 'role:admin'] */], function () {
+Route::group(['prefix' => 'admin',  'middleware' => ['auth:sanctum', 'role:admin']], function () {
     Route::controller(AdminPageController::class)->group(function () {
         Route::get('/dashbord', 'dashbord');
         Route::get('/disciplines', 'getdisciplines');
@@ -107,6 +109,8 @@ Route::group(['prefix' => 'admin'/*,  'middleware' => ['auth:sanctum', 'role:adm
     });
 })->middleware('auth:sanctum', 'role:admin');
 
-Route::middleware('auth:sanctum', 'role:client')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['prefix' => 'client',  'middleware' => ['auth:sanctum', 'role:client']], function () {
+    Route::controller(ClientPageController::class)->group(function () {
+        Route::get('/', 'getCourses');
+    });
 });

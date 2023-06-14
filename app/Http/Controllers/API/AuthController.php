@@ -39,7 +39,7 @@ class AuthController extends BaseController
         $success['name'] =  $user->name;
         $role = Role::findByName('client');
         $user->assignRole($role);
-        $user->sendEmailVerificationNotification();
+       /*  $user->sendEmailVerificationNotification(); */
 
         return $this->sendResponse($success, 'User register successfully.');
     }
