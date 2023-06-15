@@ -38,10 +38,8 @@ class InstructorPageController extends Controller
             'price' => 'required|numeric',
             'discipline_id' => 'required|exists:disciplines,id',
             'classe_id' => 'required|exists:classes,id',
-
         ]);
 
-       
 
         if ($validator->fails()) {
             // Handle validation errors
@@ -56,13 +54,12 @@ class InstructorPageController extends Controller
             $video->move(public_path('videos'), $videoName);
             $videoUrl = url('/videos/' . $videoName);
             $videoPath = public_path('videos/' . $videoName);
-
             // Get video duration using FFProbe
             $getID3 = new \getID3;
             $file = $getID3->analyze($videoPath);
 
             $duration = date('H:i:s.v', $file['playtime_seconds']);
-           
+            // return response()->json($duration);
 
 
             // Get the uploaded file from the request
@@ -81,7 +78,9 @@ class InstructorPageController extends Controller
             $course = new Course();
             $course->titre = $request->titre;
             $course->url = $videoUrl;
-            $course->background_img = $imageUrl;
+            $course->background_image = $imageUrl;
+            $course->views_number = 0;
+            $course->sells_number = 0;
             $course->duration = $duration;
             $course->description = $request->description;
             $course->niveau =  $request->niveau;
@@ -90,7 +89,6 @@ class InstructorPageController extends Controller
             $course->classe_id =  $request->classe_id;
             $course->instructor_id = $instructorId;
             $course->save();
-
             return response()->json([
                 'message' => 'Course created successfully',
                 'course' => $course,
@@ -115,8 +113,7 @@ class InstructorPageController extends Controller
     public function getCourseById($id)
     {
         $courses = Course::where('id', $id)->get();
-
-        return response()->json($courses);
+        return response()->json($courses, 200);
     }
 
 
@@ -126,7 +123,6 @@ class InstructorPageController extends Controller
 
         return response()->json($courses);
     }
-
 
     /*    public function editCourse(Request $request, $id)
     {
@@ -259,12 +255,12 @@ class InstructorPageController extends Controller
         $validator = Validator::make($request->all(), [
             'titre' => 'required|string',
             'description' => 'required|string',
-            /* 'niveau' => 'required|in:débutant,intermédiaire,avancée', */
+            'niveau' => 'required|in:débutant,intermédiaire,avancée',
             'price' => 'required|numeric',
             //'classe_id' => 'required|exists:classes,id',
             'discipline_id' => 'required|exists:disciplines,id',
-            'thumbnail_image' => 'required|image|mimes:jpeg,png,jpg',
-            'teaser' => 'nullable|mimetypes:video/mp4',
+            'background_image' => 'required|image|mimes:jpeg,png,jpg',
+            // 'teaser' => 'nullable|mimetypes:video/mp4',
             'courses'  => 'required|array',
             'courses.*' => 'exists:courses,id',
 
@@ -286,28 +282,30 @@ class InstructorPageController extends Controller
         $pack->price = $request->price;
         $pack->description = $request->description;
         $pack->discipline_id = $request->discipline_id;
-        $pack->views_number=0;
-        $pack->sells_number=0;
+        $pack->views_number = 0;
+        $pack->sells_number = 0;
 
-        if ($request->hasFile('thumbnail_image')) {
-            if ($request->hasFile('teaser')) {
-                $video = $request->file('teaser');
-                $videoName = time() . '.' . $video->getClientOriginalExtension();
-                $video->move(public_path('videos'), $videoName);
-                $videoUrl = url('/videos/' . $videoName);
+        if ($request->hasFile('background_image')) {
+            // if ($request->hasFile('teaser')) {
+            //     $video = $request->file('teaser');
+            //     $videoName = time() . '.' . $video->getClientOriginalExtension();
+            //     $video->move(public_path('videos'), $videoName);
+            //     $videoUrl = url('/videos/' . $videoName);
 
-                // Update video URL and duration
-                $pack->teaser_url = $videoUrl;
-            }
+            //     // Update video URL and duration
+            //     $pack->teaser_url = $videoUrl;
+            // }
 
-            $pack->teaser_url = null;
-            $file = $request->file('thumbnail_image');
+
+
+            // $pack->teaser_url = "null";
+            $file = $request->file('background_image');
             $fileName = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('images'), $fileName);
             $imageUrl = url('/images/' . $fileName);
 
             // Update background image URL
-            $pack->thumbnail_image = $imageUrl;
+            $pack->background_image = $imageUrl;
         }
         $pack->save();
 
@@ -319,6 +317,14 @@ class InstructorPageController extends Controller
         ], 201);
     }
 
+    public function getPackById($id)
+    {
+        $pack = Pack::where('id', $id)->with('courses')->get();
+        return response()->json(
+            $pack,
+            200
+        );
+    }
     public function getPack()
     {
         $instructorId = auth()->user()->id;
@@ -330,16 +336,6 @@ class InstructorPageController extends Controller
         );
     }
 
-    public function getPackById($id)
-    {
-        $pack = Pack::where('id', $id)->with('courses')->get();;
-
-
-        return response()->json(
-            $pack,
-            200
-        );
-    }
     public function editPack(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -365,7 +361,7 @@ class InstructorPageController extends Controller
             $pack->courses()->sync($validatedData['courses']);
         }
 
-        $pack = Pack::findOrFail($id)::with('courses');
+        $pack = Pack::findOrFail($id)::with('courses')->get();
 
         return response()->json([
             'message' => 'Pack updated successfully',

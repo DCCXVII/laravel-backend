@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subscriber;
 use App\Models\Subscribtion;
+use App\Mail\SubscriptionConfirmation;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PurchaseConfirmation;
 
 use App\Models\User;
 use Carbon\Carbon;
@@ -42,12 +45,12 @@ class PayementController extends Controller
         return 0; // Or you can throw an exception or handle the error as per your requirement
     }
 
-    public function processPayment(Request $request)
+    public function purchaseProcess(Request $request)
     {
+        $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
             'items' => 'required|array',
-            'items.*.id' => 'required|exists:courses,id|exists:packs,id',
             'items.*.type' => 'required|in:course,pack,live',
             /* 'card_number' => 'required|numeric',
             'expiration_month' => 'required|numeric|digits_between:1,12',
@@ -70,6 +73,7 @@ class PayementController extends Controller
         
  */
         $totalAmount = 0;
+        $i = 0;
         foreach ($items as $item) {
             $itemId = $item['id'];
             $itemType = $item['type'];
@@ -77,14 +81,21 @@ class PayementController extends Controller
                 $course = Course::find($itemId);
                 if ($course) {
                     $totalAmount = $totalAmount + $course->price;
+                    $items[$i]['titre'] = $course['titre'];
+                    $items[$i]['price'] = $course['price'];
+                    $i++;
                 }
             } elseif ($itemType === 'pack') {
                 $pack = Pack::find($itemId);
                 if ($pack) {
                     $totalAmount = $totalAmount + $pack->price;
+                    $items[$i]['titre'] = $pack['titre'];
+                    $items[$i]['price'] = $pack['price'];
+                    $i++;
                 }
             }
         }
+
 
 
         /*Make a request to the payment gateway API
@@ -102,7 +113,7 @@ class PayementController extends Controller
             $purchase = new Purchase();
             $purchase->transaction_id = $transactionId;
             $purchase->montant = $totalAmount;
-            $purchase->client_id = auth()->user()->id;
+            $purchase->client_id = $user->id;
             $purchase->payement_gateway    = 'paypal';
             $purchase->type = 'purchase_items';
 
@@ -148,6 +159,7 @@ class PayementController extends Controller
                     }
                 }
             }
+            Mail::to($user->email)->send(new PurchaseConfirmation($user, $items, $totalAmount));
             return response()->json(['success' => true, 'transaction_id' => $transactionId]);
         } else {
             //$errorMessage = $response->json('error_message');
@@ -211,7 +223,7 @@ class PayementController extends Controller
             $user = User::findOrFail($clientId);
             $user->givePermissionTo('access-all-content');
 
-
+            Mail::to($user->email)->send(new SubscriptionConfirmation($user, $subscription, $subscriber));
 
 
             // Return a response indicating success

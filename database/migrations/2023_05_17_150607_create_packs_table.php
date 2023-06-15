@@ -19,7 +19,7 @@ return new class extends Migration
             $table->longText('description');
             $table->enum('niveau', ['débutant', 'intermédiaire',  'avancée']);
             $table->double('price');
-            $table->string('thumbnail_image');
+            $table->string('background_image');
             $table->bigInteger('views_number');
             $table->bigInteger('sells_number');
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
@@ -30,7 +30,7 @@ return new class extends Migration
         });
     }
 
-    
+
     /**
      * Reverse the migrations.
      *

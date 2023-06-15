@@ -9,13 +9,14 @@ use App\Models\User;
 use App\Models\Course;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use App\Models\Pack;
 
 class GuestPageController extends Controller
 {
     //
     public function index(Request $request)
     {
-        $discipline = Discipline::with('classes')->select('id', 'titre', 'discipline_description')->get();
+        $discipline = Discipline::with('classes')->select('id', 'titre', 'discipline_description', 'background_img')->get();
         $instructors = User::role('instructor')->select('id', 'name', 'email', 'description', 'img_url')->get();
 
         return response([
@@ -31,9 +32,7 @@ class GuestPageController extends Controller
 
         if ($request->has('id')) {
             $query->where('id', $request->input('id'));
-            $query->with(['classes.courses' => function ($query) {
-                $query->where('status', 'accepted');
-            }]);
+            $query->with('classes.courses');
         }
 
         if ($request->has('instructor_id')) {
@@ -41,18 +40,16 @@ class GuestPageController extends Controller
 
             $query->whereHas('classes.courses', function ($query) use ($instructorId) {
                 $query->where('instructor_id', $instructorId);
-                $query->where('status', 'accepté');
             });
         }
 
-        $query->with(['classes.courses' => function ($query) {
-            $query->where('status', 'accepté');
-        }]);
+        $query->with('classes.courses');
 
         $discipline = $query->get();
-
+        //$courses = Course::where('dicipline_id', $request['id']);
         return response()->json([
-            'discipline' => $discipline
+            'discipline' => $discipline //,
+            //'course' => $courses
         ]);
     }
 
@@ -86,11 +83,7 @@ class GuestPageController extends Controller
             $query->where('niveau', $request->input('difficulty'));
         }
 
-
-
-        $courses = $query->where('status', '=', 'refusé')->get();
-
-
+        $courses = $query->select('id', 'titre', 'description', 'price', 'duration', 'background_image', 'niveau', 'views_number', 'sells_number')->get();
 
         return response()->json([
             'courses' => $courses,
@@ -108,12 +101,40 @@ class GuestPageController extends Controller
             $query->where('users.id', $request->input('id'));
         }
 
-        $instructors = $query->select('id', 'name', 'email', 'img_url', 'description')->get();
+        $instructors = $query->select('users.*')->get();
 
         return response()->json([
             'instructors' => $instructors,
         ]);
     }
+
+    public function getCoursesByDiscipline($disciplineId)
+    {
+        $courses = Course::where('discipline_id', $disciplineId)->select('id', 'titre', 'description', 'price', 'background_image', 'niveau', 'views_number', 'sells_number')->get();
+
+        return response()->json($courses);
+    }
+
+    public function getCourseById($id)
+    {
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json(['error' => 'Course not found'], 404);
+        }
+
+        return response()->json($course);
+    }
+
+
+    public function getPacks()
+    {
+        $packs = Pack::select('id', 'titre', 'description', 'niveau', 'price', 'instructor_id', 'discipline_id', 'created_at', 'updated_at', 'views_number', 'sells_number', 'status', 'background_image')->get();
+
+        return response()->json($packs, 200);
+    }
+
+
 
     public function getInstructorById($id)
     {

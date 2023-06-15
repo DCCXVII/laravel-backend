@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\SubscriptionExpiryNotification;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -60,12 +62,33 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function packs()
     {
-        return $this->  hasMany(Pack::class, 'instructor_id');
+        return $this->hasMany(Pack::class, 'instructor_id');
     }
 
     public function verificationUrl($token)
     {
         // Customize the URL here
         return url("/verify-email/{$token}");
+    }
+    public function sendSubscriptionExpiryNotification()
+    {
+        $this->notify(new SubscriptionExpiryNotification());
+    }
+
+    public function hasPurchasedItem(int $itemId, string $itemType): bool
+    {
+        $query = DB::table('purchase_item')
+            ->join('purchases', 'purchases.id', '=', 'purchase_item.purchase_id')
+            ->where('purchases.client_id', $this->id)
+            ->where('purchase_item.item_id', $itemId)
+            ->where('purchase_item.item_type', $itemType)
+            ->count();
+
+        return $query > 0;
+    }
+
+    public function subscriber()
+    {
+        return $this->hasOne(Subscriber::class);
     }
 }

@@ -34,7 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/become-instructor', 'becomeInstructor');
     });
     Route::controller(PayementController::class)->group(function () {
-        Route::post('/purchase', 'processPayment');
+        Route::post('/purchase', 'purchaseProcess');
         Route::post('/subscribe', 'subscribe');
     });
 });
@@ -42,13 +42,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 Route::controller(GuestPageController::class)->group(function () {
-    Route::get('/index', 'index');
-
-    Route::get('/discipline/', 'discipline');
-    Route::get('/instrunctor/{id}', 'getInstructorById');
-    Route::get('/instrunctor/', 'getInstructors');
-    Route::get('/coursres', 'getCourses');
-    Route::get('/series/', 'getPacks');
+    Route::get('/', 'index');
+    Route::get('/instructors', 'getInstructors');
+    Route::get('/discipline', 'discipline');
+    // ---- NO CHANGER ------- 
+    Route::get('/packs', 'getPacks');
     Route::get('/explore', 'explore');
 });
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
@@ -79,7 +77,7 @@ Route::group(['prefix' => 'instructor', 'middleware' => ['auth:sanctum', 'role:i
 });
 
 //Admin Route
-Route::group(['prefix' => 'admin',  'middleware' => ['auth:sanctum', 'role:admin']], function () {
+Route::group(['prefix' => 'admin',  /*'middleware' => ['auth:sanctum', 'role:admin']*/], function () {
     Route::controller(AdminPageController::class)->group(function () {
         Route::get('/dashbord', 'dashbord');
         Route::get('/disciplines', 'getdisciplines');
@@ -104,13 +102,14 @@ Route::group(['prefix' => 'admin',  'middleware' => ['auth:sanctum', 'role:admin
         Route::post('/course/{id}/refuse', 'refuseCourse');
         Route::post('/packs/{id}/approve', 'approvePack');
         Route::post('/packs/{id}/refuse', 'refusePack');
-        Route::get('/client', 'getClinets');
-        Route::get('/clinet/subscriber', 'getSubscriber');
+        Route::get('/client', 'getClients');
+        Route::get('/client/subscriber', 'getSubscribersInformation');
     });
 })->middleware('auth:sanctum', 'role:admin');
 
 Route::group(['prefix' => 'client',  'middleware' => ['auth:sanctum', 'role:client']], function () {
     Route::controller(ClientPageController::class)->group(function () {
         Route::get('/', 'getCourses');
+        Route::get('/course/{id}', 'getCourse');
     });
 });

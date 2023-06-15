@@ -14,6 +14,10 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InstructorApplicationAccepted;
+use App\Models\subscriber;
+use Illuminate\Support\Facades\DB;
+
+use App\Models\Purchase;
 
 
 
@@ -58,6 +62,8 @@ class AdminPageController extends Controller
 
         $totalViews = $totalViewCourses + $totalViewPacks;
 
+        $totalSales = Purchase::sum('montant');
+
 
 
         return response()->json([
@@ -72,6 +78,7 @@ class AdminPageController extends Controller
             'total_courses_view' => $totalViewCourses,
             'total_packs_view'  => $totalViewPacks,
             'total_view' => $totalViews,
+            'total_sells' => $totalSales
 
 
         ]);
@@ -284,11 +291,11 @@ class AdminPageController extends Controller
         $instructor = User::role($instructorRole)->get();;
         $courseCount = Course::where('instructor_id', $instructor->id)->count();
         $packCount = Pack::where('instructor_id', $instructor->id)->count();
-<
+
 
         return response()->json([
             'instructors' => $instructor,
-         ]);
+        ]);
     }
 
     public function acceptInstructor($id)
@@ -434,5 +441,36 @@ class AdminPageController extends Controller
     {
         $application = Application::findOrFail($id);
         $application->delete();
+    }
+
+    public function getSubscribersInformation()
+    {
+        $subscribers = Subscriber::all();
+        return $subscribers;
+    }
+
+    public function getClients()
+    {
+        $clientRole = Role::where('name', 'client')->firstOrFail();
+        $clients = $clientRole->users->map(function ($user) {
+            return $user->only(['id', 'name', 'email']);
+        });
+        $updatedClients = [];
+
+        foreach ($clients as $client) {
+            $counts = DB::table('purchases')
+                ->join('purchase_item', 'purchases.id', '=', 'purchase_item.purchase_id')
+                ->where('purchases.client_id', $client['id'])
+                ->select(
+                    DB::raw('COUNT(DISTINCT CASE WHEN purchase_item.item_type = "course" THEN purchase_item.id END) AS course_count'),
+                    DB::raw('COUNT(DISTINCT CASE WHEN purchase_item.item_type = "pack" THEN purchase_item.id END) AS pack_count')
+                )
+                ->first();
+            $client['courses_number'] = $counts->course_count ?? 0;
+            $client['packs_number'] = $counts->pack_count ?? 0;
+            $updatedClients[] = $client;
+        }
+
+        return response()->json($updatedClients);
     }
 }

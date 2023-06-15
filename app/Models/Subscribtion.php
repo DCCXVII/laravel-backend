@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Subscribtion extends Model
 {
     use HasFactory;
+    public function subscriber()
+    {
+        return $this->hasOne(subscriber::class);
+    }
 }
