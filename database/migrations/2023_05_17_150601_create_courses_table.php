@@ -20,8 +20,7 @@ return new class extends Migration
             $table->longText('description');
             $table->enum('niveau', ['Débutant', 'Intermédiaire',  'avancée']);
             $table->double('price');
-            $table->string('backgroun
-            d-image');
+            $table->string('background_image');
             $table->bigInteger('views_number');
             $table->bigInteger('sells_number');
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');

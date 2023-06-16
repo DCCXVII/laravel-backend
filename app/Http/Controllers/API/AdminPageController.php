@@ -224,14 +224,14 @@ class AdminPageController extends Controller
         $request->validate([
             'titre' => 'required',
             'classe_description' => 'required',
-            'background_img' => 'required'
+
         ]);
         $discipline = Discipline::findOrFail($id);
 
         $class = new Classe();
         $class->titre = $request->input('titre');
         $class->classe_description = $request->input('classe_description');
-        $class->background_img = $request->input('background_img');
+
         $class->discipline()->associate($discipline);
         $class->save();
 
@@ -246,7 +246,7 @@ class AdminPageController extends Controller
         // Update the discipline properties
         $classe->titre = $request->input('titre');
         $classe->discipline_description = $request->input('discipline_description');
-        $classe->background_img = $request->input('background_img');
+        
 
         $classe->update();
 
