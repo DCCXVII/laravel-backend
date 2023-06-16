@@ -320,13 +320,13 @@ class AdminPageController extends Controller
     public function getCourses()
     {
 
-        $courses = Course::where('state', '!=', 'en_attente')->get();
+        $courses = Course::where('status', '!=', 'en_attente')->get();
         return response()->json($courses);
     }
 
     public function getPendingCourses()
     {
-        $courses = Course::where('state', '=', 'en_attente')->get();
+        $courses = Course::where('status', '=', 'en_attente')->get();
         return response()->json($courses);
     }
 
