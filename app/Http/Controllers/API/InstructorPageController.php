@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Course;
 use App\Models\Pack;
+use App\Models\Discipline;
 
 class InstructorPageController extends Controller
 {
@@ -419,5 +420,13 @@ class InstructorPageController extends Controller
             'change_password_required' => false,
             'message' => 'Password changed successfully'
         ]);
+    }
+    public function getDisciplines()
+    {
+        $disciplines = Discipline::with('classes')->get();
+
+        return response()->json(
+            $disciplines
+        );
     }
 }

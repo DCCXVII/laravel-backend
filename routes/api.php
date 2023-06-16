@@ -71,6 +71,7 @@ Route::group(['prefix' => 'instructor', 'middleware' => ['auth:sanctum', 'role:i
         Route::delete('/delete-course/{id}', 'deleteCourse');
         Route::delete('/delete-pack/{id}', 'deletePack');
         Route::get('/profile', 'getProfile');
+        Route::get('/disciplines','getDisciplines');
         //route for required password change 
         Route::post('/change-password', 'changePassword')->middleware('password.change');
     });

@@ -246,7 +246,7 @@ class AdminPageController extends Controller
         // Update the discipline properties
         $classe->titre = $request->input('titre');
         $classe->discipline_description = $request->input('discipline_description');
-        
+
 
         $classe->update();
 
@@ -286,15 +286,20 @@ class AdminPageController extends Controller
     */
     public function getInstructor()
     {
-
         $instructorRole = Role::where('name', 'instructor')->firstOrFail();
-        $instructor = User::role($instructorRole)->get();;
-        $courseCount = Course::where('instructor_id', $instructor->id)->count();
-        $packCount = Pack::where('instructor_id', $instructor->id)->count();
+        $instructors = User::role($instructorRole)->get();
+        $courseCounts = [];
+        $packCounts = [];
 
+        foreach ($instructors as $instructor) {
+            $courseCounts[] = Course::where('instructor_id', $instructor->id)->count();
+            $packCounts[] = Pack::where('instructor_id', $instructor->id)->count();
+        }
 
         return response()->json([
-            'instructors' => $instructor,
+            'instructors' => $instructors,
+            'courseCounts' => $courseCounts,
+            'packCounts' => $packCounts,
         ]);
     }
 
