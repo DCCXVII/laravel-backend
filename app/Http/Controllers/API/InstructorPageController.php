@@ -15,6 +15,7 @@ use App\Models\Discipline;
 
 use App\Models\Course;
 use App\Models\Pack;
+use App\Models\Discipline;
 
 class InstructorPageController extends Controller
 {
@@ -256,7 +257,7 @@ class InstructorPageController extends Controller
         $validator = Validator::make($request->all(), [
             'titre' => 'required|string',
             'description' => 'required|string',
-            'niveau' => 'required|in:débutant,intermédiaire,avancée',
+            'niveau' => 'required|in:Débutant,intermédiaire,avancée',
             'price' => 'required|numeric',
             //'classe_id' => 'required|exists:classes,id',
             'discipline_id' => 'required|exists:disciplines,id',
