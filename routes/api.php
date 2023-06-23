@@ -60,6 +60,7 @@ Route::group(['prefix' => 'instructor', 'middleware' => ['auth:sanctum', 'role:i
     Route::controller(InstructorPageController::class)->group(function () {
         Route::get('/dashbord', 'dashbord');
         Route::get('/discipline/{id}', 'getCoursesByDiscipline');
+        Route::get('/disciplines', 'getDisciplines');
         Route::post('/create-course', 'createCourse');
         Route::get('/courses', 'getCourses');
         Route::get('/courses/{id}', 'getCourseById');

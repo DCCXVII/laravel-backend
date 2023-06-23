@@ -11,6 +11,7 @@ use getid3\GetId3Core;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Discipline;
 
 use App\Models\Course;
 use App\Models\Pack;
@@ -419,5 +420,13 @@ class InstructorPageController extends Controller
             'change_password_required' => false,
             'message' => 'Password changed successfully'
         ]);
+    }
+    public function getDisciplines()
+    {
+        $disciplines = Discipline::with('classes')->get();
+
+        return response()->json(
+            $disciplines
+        );
     }
 }
