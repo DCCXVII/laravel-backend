@@ -12,7 +12,7 @@ use App\Models\Course;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subscriber;
-use App\Models\Subscribtion;
+use App\Models\subscription;
 use App\Mail\SubscriptionConfirmation;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PurchaseConfirmation;
@@ -173,7 +173,7 @@ class PayementController extends Controller
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [
-            'subscription_id' => 'required|exists:subscribtions,id',
+            'subscription_id' => 'required|exists:subscriptions,id',
 
             /* 'card_number' => 'required|numeric',
             'expiration_month' => 'required|numeric|digits_between:1,12',
@@ -191,7 +191,7 @@ class PayementController extends Controller
         $paymentInfo = $request->input('payment_info');
 
         // Retrieve the subscription information
-        $subscription = Subscribtion::findOrFail($subscriptionId);
+        $subscription = subscription::findOrFail($subscriptionId);
 
 
         // Calculate the start and end dates for the subscription
@@ -215,7 +215,7 @@ class PayementController extends Controller
             $subscriber = new Subscriber();
             $subscriber->user_id = $clientId;
             $subscriber->start_date = $startDate;
-            $subscriber->subscribtions_id = $subscription->id;
+            $subscriber->subscriptions_id = $subscription->id;
             $subscriber->end_date = $endDate;
             $subscriber->save();
 

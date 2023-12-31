@@ -14,12 +14,18 @@ use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
 
-    public function getProfile()
+    public function getProfile(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::user(); // get the authenticated user
 
-        // Return the user profile data
-        return response()->json($user);
+        // Select only the required fields
+        $userData = $user;
+
+        return response()->json([
+            'success' => true,
+            'data' => $userData,
+            'message' => 'User data'
+        ]);
     }
 
 
@@ -38,9 +44,9 @@ class UserController extends Controller
             $user->name = $request->name;
         }
 
-        if ($request->hasFile('profile_image')) {
+        if ($request->hasFile('img_url')) {
             // Get the uploaded file from the request
-            $file = $request->file('profile_image');
+            $file = $request->file('img_url');
 
             // Generate a unique file name
             $fileName = time() . '.' . $file->getClientOriginalExtension();
@@ -48,7 +54,7 @@ class UserController extends Controller
             // Specify the directory where the file should be stored
             $directory = public_path('images');
             // Move the uploaded file to the specified directory
-            $request->profile_image->move(public_path('images'), $fileName);
+            $request->img_url->move(public_path('images'), $fileName);
 
 
             // Construct the full URL of the uploaded file
@@ -57,6 +63,7 @@ class UserController extends Controller
             // Store the image URL in the database (assuming you have a 'users' table)
 
             $user->img_url = $imageUrl;
+            $user->save();
         }
 
         if ($request->has('description')) {
@@ -78,6 +85,7 @@ class UserController extends Controller
             // Store the image URL in the database (assuming you have a 'users' table)
 
             $user->background_img = $imageUrl;
+            $user->save();
         }
 
 

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('subscribers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('subscribtions_id')->constrained('subscribtions');
+            $table->foreignId('subscriptions_id')->constrained('subscriptions');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->enum('status', ['active', 'innactive',])->default('active');

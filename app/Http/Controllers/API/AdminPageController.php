@@ -14,6 +14,8 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InstructorApplicationAccepted;
+use App\Mail\InstructorApplicationRefused;
+use App\Mail\InstructorFired;
 use App\Models\subscriber;
 use Illuminate\Support\Facades\DB;
 
@@ -153,7 +155,7 @@ class AdminPageController extends Controller
 
 
 
-    public function editeDiscipline(Request $request, $id)
+    public function editDiscipline(Request $request, $id)
     {
         // Find the discipline by ID
         $discipline = Discipline::findOrFail($id);
@@ -211,9 +213,9 @@ class AdminPageController extends Controller
         return response()->json(['message' => 'Discipline and associated courses and classes deleted successfully']);
     }
 
-    public function getClasses()
+    public function getClasses($disciplineId)
     {
-        $classes = Classe::all();
+        $classes = Classe::where('discipline_id', $disciplineId)->get();
         return response()->json($classes);
     }
 
@@ -224,7 +226,6 @@ class AdminPageController extends Controller
         $request->validate([
             'titre' => 'required',
             'classe_description' => 'required',
-
         ]);
         $discipline = Discipline::findOrFail($id);
 
@@ -237,6 +238,12 @@ class AdminPageController extends Controller
 
         return response()->json($class);
     }
+
+
+    // public function subscription(Request $request)
+    // {
+    //     $request->
+    // }
 
     public function editClasse(Request $request, $id)
     {
@@ -277,13 +284,17 @@ class AdminPageController extends Controller
     }
 
 
-    /* public function getDisciplineDetails($disciplineId)
-        {
-            $discipline = Discipline::withCount('classes')->findOrFail($disciplineId);
 
-            return response()->json($discipline);
-        }
-    */
+
+    public function getDisciplineDetails($disciplineId)
+    {
+        $discipline = Discipline::withCount('classes')->findOrFail($disciplineId);
+
+        return response()->json($discipline);
+    }
+
+
+
     public function getInstructor()
     {
         $instructorRole = Role::where('name', 'instructor')->firstOrFail();
@@ -313,6 +324,16 @@ class AdminPageController extends Controller
         return response()->json($instructor);
     }
 
+    public function activateInstructor($id)
+    {
+        $instructorRole = Role::where('name', 'instructor')->firstOrFail();
+        $instructor = User::role($instructorRole)->findOrFail($id);
+        $instructor->status = true;
+        $instructor->save();
+
+        return response()->json($instructor);
+    }
+
     public function desactivateInstructor($id)
     {
         $instructorRole = Role::where('name', 'instructor')->firstOrFail();
@@ -322,6 +343,7 @@ class AdminPageController extends Controller
 
         return response()->json($instructor);
     }
+
     public function getCourses()
     {
 
@@ -446,6 +468,27 @@ class AdminPageController extends Controller
     {
         $application = Application::findOrFail($id);
         $application->delete();
+
+        $user = User::findOrFail($application->user_id);
+
+        // Send email notification to the user
+        Mail::to($user->email)->send(new InstructorApplicationRefused($user));
+
+        // Return a response or redirect as needed
+        return response()->json(['message' => 'Instructor application refused']);
+    }
+
+    public function removeInstructor($id)
+    {
+        $instructorRole = Role::where('name', 'instructor')->firstOrFail();
+        $instructor = User::role($instructorRole)->findOrFail($id);
+        $instructor->removeRole($instructorRole);
+        $instructor->save();
+
+        Mail::to($instructor->email)->send(new InstructorFired($instructor));
+
+        // Return a response or redirect as needed
+        return response()->json(['message' => 'Instructor application fired' , $instructor]);
     }
 
     public function getSubscribersInformation()

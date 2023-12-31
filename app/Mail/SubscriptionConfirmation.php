@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
-use App\Models\Subscribtion;
+use App\Models\subscription;
 use App\Models\subscriber;
 
 class SubscriptionConfirmation extends Mailable
@@ -24,7 +24,7 @@ class SubscriptionConfirmation extends Mailable
     public $user;
     public $subscriber;
     public $subscription;
-    public function __construct(User $user, Subscribtion $subscription, Subscriber $subscriber)
+    public function __construct(User $user, subscription $subscription, Subscriber $subscriber)
     {
         $this->user = $user;
         $this->subscriber = $subscriber;

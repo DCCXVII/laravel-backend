@@ -10,6 +10,7 @@ use App\Models\Course;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Models\Pack;
+use App\Models\Subscription;
 
 class GuestPageController extends Controller
 {
@@ -17,15 +18,15 @@ class GuestPageController extends Controller
     {
         $discipline = Discipline::with('classes')->select('id', 'titre', 'discipline_description')->get();
         $instructors = User::role('instructor')->select('id', 'name', 'email', 'description', 'img_url')->get();
-
+        $subscriptions = Subscription::all();
         return response([
             "discipline" => $discipline,
             "instructors" => $instructors,
-
+            'subscriptions' => $subscriptions
         ], 201);
     }
 
-    public function discipline(Request $request)
+    public function getDisciplines(Request $request)
     {
         $query = Discipline::query();
 
@@ -48,11 +49,33 @@ class GuestPageController extends Controller
         $query->with(['classes.courses' => function ($query) {
             $query->where('status', 'accepté');
         }]);
+        
+        $query->withCount('classes'); // Add the count of classes
+
 
         $discipline = $query->get();
 
         return response()->json([
-            'discipline' => $discipline
+            'success' => true,
+            'data' => $discipline,
+            'message' => 'Disciplines fetched.'
+        ]);
+    }
+
+    public function getSubscriptions(Request $request)
+    {
+        $query = Subscription::query();
+
+        if ($request->has('id')) {
+            $query->where('id', $request->input('id'));
+        }
+
+        $subscriptions = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $subscriptions,
+            'message' => 'Subscriptions fetched.'
         ]);
     }
 

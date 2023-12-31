@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Subscribtion;
+use App\Models\subscription;
 
 class subscriber extends Model
 {
@@ -14,9 +14,9 @@ class subscriber extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function subscribtion()
+    public function subscription()
     {
-        return $this->belongsTo(Subscribtion::class);
+        return $this->belongsTo(subscription::class);
     }
 
     public function toArray()
@@ -25,8 +25,8 @@ class subscriber extends Model
 
         $array['client_name'] = $this->user->name ?? null;
         $array['client_email'] = $this->user->email ?? null;
-        $array['subscription'] = $this->subscribtion->title ?? null;
-        $array['duration'] = $this->subscribtion->duration ?? null;
+        $array['subscription'] = $this->subscription->title ?? null;
+        $array['duration'] = $this->subscription->duration ?? null;
 
 
 

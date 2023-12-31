@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Subscribtion;
+use App\Models\Subscription;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -18,7 +18,7 @@ class SubscriptionSeeder extends Seeder
     {
         //
         // Subscription with monthly payment
-        Subscribtion::create([
+        subscription::create([
             'name' => 'Abbonement mensuel',
             'type' => 'mensuel',
             'duration' => 30, // Example duration, adjust as needed
@@ -26,7 +26,7 @@ class SubscriptionSeeder extends Seeder
         ]);
 
         // Subscription with quarterly payment
-        Subscribtion::create([
+        subscription::create([
             'name' => 'Abbonement trimestriel ',
             'type' => 'trimestriel',
             'duration' => 90, // Example duration, adjust as needed
@@ -34,7 +34,7 @@ class SubscriptionSeeder extends Seeder
         ]);
 
         // Subscription with annual payment
-        Subscribtion::create([
+        subscription::create([
             'name' => 'Abbonement annuel ',
             'type' => 'annuel',
             'duration' => '365 ', // Example duration, adjust as needed

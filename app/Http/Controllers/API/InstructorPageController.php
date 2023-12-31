@@ -12,10 +12,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Discipline;
-
 use App\Models\Course;
 use App\Models\Pack;
-use App\Models\Discipline;
 
 class InstructorPageController extends Controller
 {
@@ -330,7 +328,7 @@ class InstructorPageController extends Controller
     public function getPack()
     {
         $instructorId = auth()->user()->id;
-        $packs = Pack::where('coach_id', $instructorId)->with('courses')->get();
+        $packs = Pack::where('instructor_id', $instructorId)->with('courses')->get();
 
         return response()->json(
             $packs,
@@ -430,4 +428,10 @@ class InstructorPageController extends Controller
             $disciplines
         );
     }
+
+    // public function createLive(Request $request){
+    //     $validator = Validator::make($request->all(), [
+
+    //     ]);
+    // }
 }
